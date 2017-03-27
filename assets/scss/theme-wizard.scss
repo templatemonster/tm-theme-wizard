@@ -39,6 +39,7 @@
 	.theme-wiazrd-form {
 		&__row {
 			padding: 0 0 30px;
+			position: relative;
 			label {
 				display: block;
 				color: $textColorAlt;
@@ -61,6 +62,14 @@
 		min-height: 50px;
 		border: 1px solid $bordersColor;
 		box-shadow: none;
+		&.wizard-error {
+			border-color: $dangerColor;
+		}
+	}
+
+	.wizard-error-message {
+		color: $dangerColor;
+		position: absolute;
 	}
 
 	.btn {
@@ -132,6 +141,10 @@
 				opacity: 1;
 			}
 		}
+	}
+
+	.wizard-log {
+		padding: 30px 0 0 0;
 	}
 }
 

@@ -11,18 +11,17 @@
 	<?php
 		ttw_interface()->add_form_row( array(
 			'label'       => esc_html__( 'Template ID:', 'tm-theme-wizard' ),
-			'field'       => 'tempalte-id',
-			'placeholder' => esc_html__( 'Enter your template ID:', 'tm-theme-wizard' ),
+			'field'       => 'template_id',
+			'placeholder' => esc_html__( 'Enter your template ID here...', 'tm-theme-wizard' ),
 		) );
 		ttw_interface()->add_form_row( array(
 			'label'       => esc_html__( 'Order ID:', 'tm-theme-wizard' ),
-			'field'       => 'order-id',
-			'placeholder' => esc_html__( 'Enter your order ID:', 'tm-theme-wizard' ),
+			'field'       => 'order_id',
+			'placeholder' => esc_html__( 'Enter your order ID here...', 'tm-theme-wizard' ),
+		) );
+		ttw_interface()->button( array(
+			'action' => 'start-install',
+			'text'   => esc_html__( 'Start Install', 'tm-theme-wizard' ),
 		) );
 	?>
-	<button class="btn btn-primary" data-theme-wizard="start-install" data-loader="true" data-href="">
-		<span class="text"><?php
-			esc_html_e( 'Start Install', 'tm-theme-wizard' );
-		?></span><span class="tm-wizard-loader"><span class="tm-wizard-loader__spinner"></span></span>
-	</button>
 </div>

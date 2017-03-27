@@ -78,7 +78,9 @@ if ( ! class_exists( 'TM_Theme_Wizard' ) ) {
 		 * @var array
 		 */
 		private $files = array(
-			'interface' => 'includes/class-ttw-interface.php',
+			'interface'   => 'includes/class-ttw-interface.php',
+			'ajax'        => 'includes/class-ttw-ajax-handlers.php',
+			'updater-api' => 'includes/class-ttw-updater-api.php',
 		);
 
 		/**
@@ -118,7 +120,7 @@ if ( ! class_exists( 'TM_Theme_Wizard' ) ) {
 
 			add_action( 'init', array( $this, 'activation_redirect' ) );
 
-			$this->dependencies( array( 'interface' ) );
+			$this->dependencies( array( 'interface', 'ajax' ) );
 			add_action( 'admin_menu', array( ttw_interface(), 'register_page' ) );
 		}
 
@@ -292,7 +294,10 @@ if ( ! class_exists( 'TM_Theme_Wizard' ) ) {
 			wp_enqueue_script( $this->slug() );
 
 			wp_localize_script( $this->slug(), 'tmThemeWizardSettings', array(
-				'emptyField' => esc_html__( '* Please, fill this field in', 'tm-theme-wizard' ),
+				'nonce'  => wp_create_nonce( $this->slug() ),
+				'errors' => array(
+					'empty' => esc_html__( '* Please, fill this field', 'tm-theme-wizard' ),
+				),
 			) );
 
 			wp_enqueue_style( $this->slug() );

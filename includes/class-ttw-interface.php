@@ -117,6 +117,27 @@ if ( ! class_exists( 'TTW_Interface' ) ) {
 		}
 
 		/**
+		 * Returns button HTML
+		 *
+		 * @param  array  $args Button arguments.
+		 * @return void
+		 */
+		public function button( $args = array() ) {
+
+			$args = wp_parse_args( $args, array(
+				'action' => '',
+				'text'   => '',
+			) );
+
+			$format = '<button class="btn btn-primary" data-theme-wizard="%1$s">
+				<span class="text">%2$s</span>
+				<span class="theme-wizard-loader"><span class="theme-wizard-loader__spinner"></span></span>
+			</button>';
+
+			return printf( $format, $args['action'], $args['text'] );
+		}
+
+		/**
 		 * Get plugin template
 		 *
 		 * @param  string $template Template name.
