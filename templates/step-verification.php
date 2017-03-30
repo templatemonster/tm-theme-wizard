@@ -7,7 +7,7 @@
 <div class="desc"><?php
 	esc_html_e( 'Please, enter your Template ID and order ID to start installation:', 'tm-theme-wizard' );
 ?></div>
-<div class="theme-wiazrd-form">
+<div class="theme-wizard-form">
 	<?php
 		ttw_interface()->add_form_row( array(
 			'label'       => esc_html__( 'Template ID:', 'tm-theme-wizard' ),

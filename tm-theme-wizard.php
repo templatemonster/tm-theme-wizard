@@ -81,7 +81,15 @@ if ( ! class_exists( 'TM_Theme_Wizard' ) ) {
 			'interface'   => 'includes/class-ttw-interface.php',
 			'ajax'        => 'includes/class-ttw-ajax-handlers.php',
 			'updater-api' => 'includes/class-ttw-updater-api.php',
+			'child-api'   => 'includes/class-ttw-child-api.php',
 		);
+
+		/**
+		 * Settings list
+		 *
+		 * @var array
+		 */
+		public $settings = array();
 
 		/**
 		 * Plugin functions prefix
@@ -98,6 +106,12 @@ if ( ! class_exists( 'TM_Theme_Wizard' ) ) {
 			if ( ! is_admin() ) {
 				return;
 			}
+
+			$this->settings = array(
+				'options' => array(
+					'parent_data' => 'tm-theme-wizard-installed-parent',
+				),
+			);
 
 			$this->hooks();
 

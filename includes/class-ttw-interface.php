@@ -108,12 +108,47 @@ if ( ! class_exists( 'TTW_Interface' ) ) {
 				'placeholder' => '',
 			) );
 
-			$format = '<div class="theme-wiazrd-form__row">
+			$format = '<div class="theme-wizard-form__row">
 				<label for="%2$s">%1$s</label>
 				<input type="text" name="%2$s" id="%2$s" class="wizard-input input-%2$s" placeholder="%3$s">
 			</div>';
 
 			printf( $format, $args['label'], $args['field'], $args['placeholder'] );
+		}
+
+		/**
+		 * Add wizard form row
+		 *
+		 * @param  array $args Row arguments array
+		 * @return void
+		 */
+		public function add_form_radio( $args = array() ) {
+
+			$args = wp_parse_args( $args, array(
+				'label'   => '',
+				'field'   => '',
+				'value'   => '',
+				'checked' => false,
+				'desc'    => '',
+			) );
+
+			$format = '<label class="theme-wizard-radio">
+				<input type="radio" name="%1$s" value="%2$s" %3$s>
+				<span class="theme-wizard-radio__mask"></span>
+				<span class="theme-wizard-radio__label">
+					<span class="theme-wizard-radio__label-title">%4$s</span>
+					<span class="theme-wizard-radio__label-desc">%5$s</span>
+				</span>
+			</label>';
+
+			printf(
+				$format,
+				$args['field'],
+				$args['value'],
+				( true === $args['checked'] ) ? 'checked' : '',
+				$args['label'],
+				$args['desc']
+			);
 		}
 
 		/**

@@ -5,15 +5,15 @@
 	var tmThemeWizard = {
 		css: {
 			start: '[data-theme-wizard="start-install"]',
-			form: '.theme-wiazrd-form',
+			form: '.theme-wizard-form',
 			input: '.wizard-input'
 		},
 
 		init: function() {
 
 			$( document )
-				.on( 'focus.tmThemeWizard', tmThemeWizard.css.start, tmThemeWizard.startInstall )
-				.on( 'click.tmThemeWizard', tmThemeWizard.css.input, tmThemeWizard.clearErrors );
+				.on( 'click.tmThemeWizard', tmThemeWizard.css.start, tmThemeWizard.startInstall )
+				.on( 'focus.tmThemeWizard', tmThemeWizard.css.input, tmThemeWizard.clearErrors );
 		},
 
 		startInstall: function() {
@@ -23,8 +23,7 @@
 				$input = $( tmThemeWizard.css.input, $form ),
 				errors = false,
 				data   = {
-					action: 'tm_theme_wizard_verify_data',
-					nonce: settings.nonce
+					action: 'tm_theme_wizard_verify_data'
 				};
 
 			event.preventDefault();
@@ -47,7 +46,16 @@
 			}
 
 			$this.addClass( 'in-progress' );
-			tmThemeWizard.clearErrors();
+
+			tmThemeWizard.clearErrors( $input );
+			tmThemeWizard.clearLog( $this );
+			tmThemeWizard.doRecursiveAjax( $this, data );
+
+		},
+
+		doRecursiveAjax: function( $this, data ) {
+
+			data.nonce = settings.nonce;
 
 			$.ajax({
 				url: ajaxurl,
@@ -57,22 +65,34 @@
 			}).done( function( response ) {
 
 				if ( true === response.success ) {
-					tmThemeWizard.addLog( $this, response.data.message );
+					tmThemeWizard.addLog( $this, response.data.message, 'success' );
+
+					if ( true === response.data.doNext ) {
+						tmThemeWizard.doRecursiveAjax( $this, response.data.nextRequest );
+					}
+
+					if ( undefined !== response.data.redirect ) {
+						window.location = response.data.redirect;
+					}
+
 					return;
 				}
 
-				tmThemeWizard.addError( $this, response.data.message );
+				tmThemeWizard.addLog( $this, response.data.message, 'error' );
 				$this.removeClass( 'in-progress' );
 			});
 
 		},
 
-		installTheme: function() {
+		addLog: function ( $target, log, type ) {
 
-		},
+			if ( ! $target.next( '.wizard-log' ).length ) {
+				$target.after( '<div class="wizard-log"></div>' );
+			}
 
-		addLog: function ( $target, log ) {
-			$target.after('<div class="wizard-log">' + log + '</div>');
+			$target.next( '.wizard-log' ).append(
+				'<div class="wizard-log__item type-' + type + '">' + log + '</div>'
+			);
 		},
 
 		addError: function( $target, error ) {
@@ -82,6 +102,12 @@
 			}
 
 			$target.addClass( 'wizard-error' ).after('<div class="wizard-error-message">' + error + '</div>');
+		},
+
+		clearLog: function( $target ) {
+			if ( $target.next( '.wizard-log' ).length > 0 ) {
+				$target.next( '.wizard-log' ).remove();
+			}
 		},
 
 		clearErrors: function() {
