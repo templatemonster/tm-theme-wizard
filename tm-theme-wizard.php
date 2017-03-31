@@ -82,6 +82,8 @@ if ( ! class_exists( 'TM_Theme_Wizard' ) ) {
 			'ajax'        => 'includes/class-ttw-ajax-handlers.php',
 			'updater-api' => 'includes/class-ttw-updater-api.php',
 			'child-api'   => 'includes/class-ttw-child-api.php',
+			'install-api' => 'includes/class-ttw-install-api.php',
+			'compat'      => 'includes/class-ttw-compat.php',
 		);
 
 		/**
@@ -110,10 +112,11 @@ if ( ! class_exists( 'TM_Theme_Wizard' ) ) {
 			$this->settings = array(
 				'options' => array(
 					'parent_data' => 'tm-theme-wizard-installed-parent',
+					'child_data'  => 'tm-theme-wizard-installed-child',
 				),
 			);
 
-			$this->hooks();
+			add_action( 'after_setup_theme', array( $this, 'hooks' ) );
 
 			register_activation_hook( __FILE__,   array( $this, '_activation' ) );
 			register_deactivation_hook( __FILE__, array( $this, '_deactivation' ) );
@@ -128,13 +131,13 @@ if ( ! class_exists( 'TM_Theme_Wizard' ) ) {
 		public function hooks() {
 
 			add_action( 'init',                  array( $this, 'lang' ), 2 );
-			add_action( 'init',                  array( $this, 'init' ) );
 			add_action( 'admin_enqueue_scripts', array( $this, 'register_assets' ) );
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 
 			add_action( 'init', array( $this, 'activation_redirect' ) );
 
-			$this->dependencies( array( 'interface', 'ajax' ) );
+			$this->dependencies( array( 'interface', 'ajax', 'compat' ) );
+			add_action( 'admin_menu', array( ttw_interface(), 'register_page' ) );
 			add_action( 'admin_menu', array( ttw_interface(), 'register_page' ) );
 		}
 
@@ -217,15 +220,6 @@ if ( ! class_exists( 'TM_Theme_Wizard' ) ) {
 			delete_transient( $this->slug() . '_redirect' );
 			wp_redirect( ttw_interface()->get_page_link() );
 			die();
-		}
-
-		/**
-		 * Init plugin
-		 *
-		 * @return void
-		 */
-		public function init() {
-
 		}
 
 		/**

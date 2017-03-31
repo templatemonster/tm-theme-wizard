@@ -15,18 +15,20 @@ if ( ! $theme_data ) {
 	printf( esc_html__( 'We recommend you to use our child themes generator to get child theme for %s', 'tm-theme-wizard' ), $theme_data['ThemeName'] );
 ?></div>
 <div class="theme-wizard-form">
-	<?php
+	<div class="theme-wizard-radio-wrap"><?php
 		ttw_interface()->add_form_radio( array(
 			'label'   => esc_html__( 'Continue with parent theme', 'tm-theme-wizard' ),
 			'field'   => 'use_child',
-			'value'   => 'not_use_child',
+			'value'   => 'skip_child',
 			'checked' => true,
 		) );
 		ttw_interface()->add_form_radio( array(
 			'label'   => esc_html__( 'Use child theme', 'tm-theme-wizard' ),
 			'field'   => 'use_child',
-			'value'   => 'use_child',
+			'value'   => 'get_child',
 		) );
+	?></div>
+	<?php
 		ttw_interface()->button( array(
 			'action' => 'get-child',
 			'text'   => esc_html__( 'Continue', 'tm-theme-wizard' ),

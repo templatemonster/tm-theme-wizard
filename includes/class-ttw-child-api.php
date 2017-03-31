@@ -1,4 +1,3 @@
-?id=62222&slug=monstroid2&name=Monstroid2
 <?php
 /**
  * Class description
@@ -50,13 +49,6 @@ if ( ! class_exists( 'TTW_Child_API' ) ) {
 		private $name = null;
 
 		/**
-		 * Storage for error data.
-		 *
-		 * @var null
-		 */
-		private $error = null;
-
-		/**
 		 * Endpoint for updated list
 		 *
 		 * @var string
@@ -74,15 +66,6 @@ if ( ! class_exists( 'TTW_Child_API' ) ) {
 			$this->id   = $id;
 			$this->slug = $slug;
 			$this->name = $name;
-		}
-
-		/**
-		 * Returns error text
-		 *
-		 * @return void
-		 */
-		public function get_error() {
-			return $this->error;
 		}
 
 		/**

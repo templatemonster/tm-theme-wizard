@@ -5,6 +5,7 @@
 	var tmThemeWizard = {
 		css: {
 			start: '[data-theme-wizard="start-install"]',
+			getChild: '[data-theme-wizard="get-child"]',
 			form: '.theme-wizard-form',
 			input: '.wizard-input'
 		},
@@ -13,6 +14,7 @@
 
 			$( document )
 				.on( 'click.tmThemeWizard', tmThemeWizard.css.start, tmThemeWizard.startInstall )
+				.on( 'click.tmThemeWizard', tmThemeWizard.css.getChild, tmThemeWizard.maybeGetChild )
 				.on( 'focus.tmThemeWizard', tmThemeWizard.css.input, tmThemeWizard.clearErrors );
 		},
 
@@ -48,6 +50,29 @@
 			$this.addClass( 'in-progress' );
 
 			tmThemeWizard.clearErrors( $input );
+			tmThemeWizard.clearLog( $this );
+			tmThemeWizard.doRecursiveAjax( $this, data );
+
+		},
+
+		maybeGetChild: function() {
+
+			var $this  = $( this ),
+				$form  = $this.closest( tmThemeWizard.css.form ),
+				$input = $( 'input[type="radio"]:checked', $form ),
+				action = $input.val(),
+				data   = {
+					action: 'tm_theme_wizard_' + action
+				};
+
+			event.preventDefault();
+
+			if ( $this.hasClass( 'in-progress' ) ) {
+				return;
+			}
+
+			$this.addClass( 'in-progress' );
+
 			tmThemeWizard.clearLog( $this );
 			tmThemeWizard.doRecursiveAjax( $this, data );
 
