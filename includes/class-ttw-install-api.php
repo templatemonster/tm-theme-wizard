@@ -34,6 +34,20 @@ if ( ! class_exists( 'TTW_Install_API' ) ) {
 		private static $instance = null;
 
 		/**
+		 * Installation result
+		 *
+		 * @var mixed
+		 */
+		private $result;
+
+		/**
+		 * Adjusted theme/plugin directory name
+		 *
+		 * @var string
+		 */
+		private $adjusted_dir;
+
+		/**
 		 * Constructor for the class
 		 */
 		function __construct( $url = null ) {
@@ -106,7 +120,11 @@ if ( ! class_exists( 'TTW_Install_API' ) ) {
 		 *
 		 * @return array
 		 */
-		public function do_plugin_install() {
+		public function do_plugin_install( $slug = null ) {
+
+			if ( ! $slug ) {
+				return;
+			}
 
 			include_once( ABSPATH . 'wp-admin/includes/class-wp-upgrader.php' );
 
@@ -114,9 +132,11 @@ if ( ! class_exists( 'TTW_Install_API' ) ) {
 
 			$plugin_url = $this->url;
 
-			$skin     = new WP_Ajax_Upgrader_Skin();
+			$skin     = new WP_Ajax_Upgrader_Skin( array( 'plugin' => $slug ) );
 			$upgrader = new Plugin_Upgrader( $skin );
 			$result   = $upgrader->install( $plugin_url );
+
+			$this->result = $result;
 
 			remove_filter( 'upgrader_source_selection', array( $this, 'adjust_plugin_dir' ), 1 );
 
@@ -130,6 +150,8 @@ if ( ! class_exists( 'TTW_Install_API' ) ) {
 				$success = false;
 
 			} elseif ( is_wp_error( $skin->result ) ) {
+
+				$this->result = $skin->result;
 
 				$message = $skin->result->get_error_message();
 				$success = false;
@@ -159,6 +181,47 @@ if ( ! class_exists( 'TTW_Install_API' ) ) {
 		}
 
 		/**
+		 * Get information about installed object.
+		 *
+		 * @return array
+		 */
+		public function get_info() {
+
+			$info = array(
+				'dir'  => false,
+				'file' => false,
+			);
+
+			if ( true === $this->result ) {
+
+				if ( ! $this->adjusted_dir ) {
+					return $info;
+				}
+
+				$info['dir'] = basename( $this->adjusted_dir );
+			}
+
+			if ( is_wp_error( $this->result ) && 'folder_exists' === $this->result->get_error_code() ) {
+				$path = $this->result->get_error_data();
+				$info['dir'] = basename( $path );
+			}
+
+			if ( empty( $info['dir'] ) ) {
+				return $info;
+			}
+
+			/** Get the installed plugin file or return false if it isn't set */
+			$plugin = get_plugins( '/' . $info['dir'] );
+
+			if ( ! empty( $plugin ) ) {
+				$pluginfiles = array_keys( $plugin );
+				$info['file'] = $info['dir'] . '/' . $pluginfiles[0];
+			}
+
+			return $info;
+		}
+
+		/**
 		 * Adjust the plugin directory name if necessary.
 		 *
 		 * The final destination directory of a plugin is based on the subdirectory name found in the
@@ -177,7 +240,8 @@ if ( ! class_exists( 'TTW_Install_API' ) ) {
 
 			global $wp_filesystem;
 
-			if ( ! tm_wizard_installer()->is_wizard_request() || ! is_object( $wp_filesystem ) ) {
+			// Ensure that is Wizard installation request
+			if ( empty( $_REQUEST['action'] ) && 'tm_theme_wizard_install_plugins_wizard' !== $_REQUEST['action'] ) {
 				return $source;
 			}
 
@@ -201,6 +265,9 @@ if ( ! class_exists( 'TTW_Install_API' ) ) {
 				$to_path   = trailingslashit( $remote_source ) . $desired_slug;
 
 				if ( true === $wp_filesystem->move( $from_path, $to_path ) ) {
+
+					$this->adjusted_dir = $to_path;
+
 					return trailingslashit( $to_path );
 				} else {
 					return new WP_Error(

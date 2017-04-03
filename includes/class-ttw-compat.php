@@ -42,22 +42,33 @@ if ( ! class_exists( 'TTW_Compat' ) ) {
 		}
 
 		/**
+		 * Returns plugins wizard data
+		 *
+		 * @return array
+		 */
+		public function get_wizard() {
+			return apply_filters( 'ttw_get_plugins_wizard_from_theme', false );
+		}
+
+		/**
 		 * Perform plugins wizard installation to allow themes compatibility
 		 *
 		 * @return void
 		 */
 		public function default_theme_compat() {
 
-			$plugins_wizard = apply_filters( 'ttw_get_plugins_wizard_from_theme', false );
+			$plugins_wizard = $this->get_wizard();
 
 			if ( ! $plugins_wizard ) {
 				return;
 			}
 
-			$this->cache['plugins_wizard'] = $plugins_wizard;
-
 			add_filter( 'ttw_activate_theme_response', array( $this, 'add_install_wizard_step' ), 10, 2 );
+
 			add_action( 'wp_ajax_tm_theme_wizard_install_plugins_wizard', array( $this, 'install_plugins_wizard' ) );
+			add_action( 'ttw_skip_child_installation',                    array( $this, 'install_plugins_wizard' ) );
+
+			add_action( 'wp_ajax_tm_theme_wizard_get_success_redirect_link', array( $this, 'get_success_redirect' ) );
 		}
 
 		/**
@@ -70,13 +81,14 @@ if ( ! class_exists( 'TTW_Compat' ) ) {
 			}
 
 			$response = array(
-				'message'     => esc_html__( 'Child theme installed. Installing plugins wizard...', 'tm-theme-wizard' ),
+				'message'     => esc_html__( 'Installing plugins wizard...', 'tm-theme-wizard' ),
 				'doNext'      => true,
 				'nextRequest' => array(
 					'action' => 'tm_theme_wizard_install_plugins_wizard',
 				),
 			);
 
+			return $response;
 		}
 
 		/**
@@ -86,23 +98,44 @@ if ( ! class_exists( 'TTW_Compat' ) ) {
 		public function install_plugins_wizard() {
 
 			ttw_ajax_handlers()->verify_request();
+			$wizard_data = $this->get_wizard();
 
-			$wizard_data = isset( $this->cache['plugins_wizard'] ) ? $this->cache['plugins_wizard'] : false;
-
-			if ( ! $wizard_data || ! isset( $wizard_data['source'] ) ) {
+			if ( ! $wizard_data || ! isset( $wizard_data['source'] ) || ! isset( $wizard_data['slug'] ) ) {
 				wp_send_json_error( array(
 					'message' => esc_html__( 'Plugins wizard data not found.', 'tm-theme-wizard' ),
 				) );
 			}
 
 			ttw()->dependencies( array( 'install-api' ) );
-			$api = ttw_install_api( $theme_url );
+			$api = ttw_install_api( $wizard_data['source'] );
 
-			$result = $api->do_plugin_install();
+			$result = $api->do_plugin_install( $wizard_data['slug'] );
+
+			$plugin_info = $api->get_info();
+
+			if ( ! empty( $plugin_info['file'] ) ) {
+				activate_plugin( $plugin_info['file'] );
+			}
 
 			wp_send_json_success( array(
 				'message'  => $result['message'],
-				'redirect' => ttw_interface()->get_page_link( 'success' ),
+				'doNext'      => true,
+				'nextRequest' => array(
+					'action' => 'tm_theme_wizard_get_success_redirect_link',
+				),
+			) );
+		}
+
+		/**
+		 * Get redirect link.
+		 *
+		 * @return void
+		 */
+		public function get_success_redirect() {
+			ttw_ajax_handlers()->verify_request();
+			wp_send_json_success( array(
+				'message'  => esc_html__( 'All done, redirecting...', 'tm-theme-wizard' ),
+				'redirect' => ttw_interface()->success_page_link(),
 			) );
 		}
 

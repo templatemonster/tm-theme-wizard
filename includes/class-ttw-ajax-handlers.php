@@ -45,6 +45,7 @@ if ( ! class_exists( 'TTW_Ajax_Handlers' ) ) {
 				'get_child',
 				'install_child',
 				'activate_child',
+				'skip_child',
 			);
 
 			foreach ( $actions as $action ) {
@@ -105,18 +106,30 @@ if ( ! class_exists( 'TTW_Ajax_Handlers' ) ) {
 		}
 
 		/**
+		 * Skip child theme installation
+		 *
+		 * @return void
+		 */
+		public function skip_child() {
+
+			$this->verify_request();
+
+			do_action( 'ttw_skip_child_installation' );
+
+			wp_send_json_success( array(
+				'message'  => esc_html__( 'Child theme installation skipped. Continue with parent theme...' ),
+				'redirect' => ttw_interface()->success_page_link(),
+			) );
+
+		}
+
+		/**
 		 * Perfrorm child theme activation
 		 *
 		 * @return void
 		 */
 		public function activate_child() {
-
-			$child_redirect = apply_filters(
-				'ttw_after_child_redirect_url',
-				ttw_interface()->get_page_link( 'success' )
-			);
-
-			$this->activate_theme( 'child', $child_redirect );
+			$this->activate_theme( 'child', ttw_interface()->success_page_link() );
 		}
 
 		/**
@@ -220,7 +233,7 @@ if ( ! class_exists( 'TTW_Ajax_Handlers' ) ) {
 				'message'     => $result['message'],
 				'doNext'      => true,
 				'nextRequest' => array(
-					'action' => 'tm_theme_wizard_activate_child',
+					'action' => 'tm_theme_wizard_activate_parent',
 				),
 			) );
 		}

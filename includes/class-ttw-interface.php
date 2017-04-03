@@ -95,6 +95,15 @@ if ( ! class_exists( 'TTW_Interface' ) ) {
 		}
 
 		/**
+		 * Returns URL of succes page.
+		 *
+		 * @return string
+		 */
+		public function success_page_link() {
+			return apply_filters( 'ttw_success_redirect_url', $this->get_page_link( 'success' ) );
+		}
+
+		/**
 		 * Add wizard form row
 		 *
 		 * @param  array $args Row arguments array
