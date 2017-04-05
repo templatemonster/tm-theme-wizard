@@ -100,6 +100,16 @@ if ( ! class_exists( 'TTW_Updater_API' ) ) {
 				return false;
 			}
 
+			$verification_data = array(
+				'version'    => $latest,
+				'verify'     => true,
+				'update'     => $latest,
+				'product-id' => $this->template_id,
+				'order-id'   => $this->order_id,
+			);
+
+			set_transient( 'ttw_verification_data', $verification_data, DAY_IN_SECONDS );
+
 			return $release_data['download_url'];
 		}
 

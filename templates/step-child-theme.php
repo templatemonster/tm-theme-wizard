@@ -18,12 +18,14 @@ if ( ! $theme_data ) {
 	<div class="theme-wizard-radio-wrap"><?php
 		ttw_interface()->add_form_radio( array(
 			'label'   => esc_html__( 'Continue with parent theme', 'tm-theme-wizard' ),
+			'desc'    => esc_html__( 'Skip child theme installation and continute with parent theme.', 'tm-theme-wizard' ),
 			'field'   => 'use_child',
 			'value'   => 'skip_child',
 			'checked' => true,
 		) );
 		ttw_interface()->add_form_radio( array(
 			'label'   => esc_html__( 'Use child theme', 'tm-theme-wizard' ),
+			'desc'    => esc_html__( 'Download and install child theme. Note: we recommend this way, because is the most safe way to make future modifictaions.', 'tm-theme-wizard' ),
 			'field'   => 'use_child',
 			'value'   => 'get_child',
 		) );

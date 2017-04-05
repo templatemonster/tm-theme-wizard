@@ -39,6 +39,38 @@ if ( ! class_exists( 'TTW_Compat' ) ) {
 		 */
 		function __construct() {
 			add_action( 'after_setup_theme', array( $this, 'default_theme_compat' ), 99 );
+			add_action( 'tm_theme_wizard_before_activation', array( $this, 'store_data_for_dashboard' ), 10, 2 );
+		}
+
+		/**
+		 * Stroe verification data for TM Dashboard.
+		 *
+		 * @param  string $type Activated theme type (parent/child).
+		 * @param  array  $data Theme data.
+		 * @return void
+		 */
+		public function store_data_for_dashboard( $type, $data ) {
+
+			if ( 'parent' !== $type ) {
+				return;
+			}
+
+			$verified_themes   = get_option( 'verified_themes', array() );
+			$verification_data = get_transient( 'ttw_verification_data' );
+
+			if ( ! $verification_data ) {
+				return;
+			}
+
+			$slug = $data['TextDomain'];
+
+			if ( isset( $verified_themes[ $slug ] ) ) {
+				return;
+			}
+
+			$verified_themes[ $slug ] = array_merge( array( 'slug' => $slug ), $verification_data );
+
+			update_option( 'verified_themes', $verified_themes );
 		}
 
 		/**
@@ -47,7 +79,26 @@ if ( ! class_exists( 'TTW_Compat' ) ) {
 		 * @return array
 		 */
 		public function get_wizard() {
-			return apply_filters( 'ttw_get_plugins_wizard_from_theme', false );
+
+			$wizard = apply_filters( 'ttw_get_plugins_wizard_from_theme', false );
+
+			if ( false !== $wizard ) {
+				return $wizard;
+			}
+
+			// Fallback for themes with plugins wizard manifest but without filter for compatibility.
+			$manifest = locate_template( 'tm-wizard-manifest.php' );
+
+			if ( file_exists( $manifest ) ) {
+				return array(
+					'name'         => esc_html__( 'TM Wizard', 'tm-theme-wizard' ),
+					'slug'         => 'tm-wizard',
+					'source'       => 'https://github.com/templatemonster/tm-wizard/archive/v1.0.0.zip',
+					'external_url' => 'https://github.com/templatemonster/tm-wizard/',
+				);
+			}
+
+			return false;
 		}
 
 		/**

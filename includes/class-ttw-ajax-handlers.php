@@ -32,7 +32,7 @@ if ( ! class_exists( 'TTW_Ajax_Handlers' ) ) {
 		 */
 		function __construct() {
 
-			//$this->test_request();
+			//add_action( 'init', array( $this, 'activate_child' ) );
 
 			if ( ! defined( 'DOING_AJAX' ) || ! DOING_AJAX ) {
 				return;
@@ -51,6 +51,7 @@ if ( ! class_exists( 'TTW_Ajax_Handlers' ) ) {
 			foreach ( $actions as $action ) {
 				if ( is_callable( array( $this, $action ) ) ) {
 					add_action( 'wp_ajax_tm_theme_wizard_' . $action, array( $this, $action ) );
+					add_action( 'init' );
 				}
 			}
 
@@ -346,7 +347,7 @@ if ( ! class_exists( 'TTW_Ajax_Handlers' ) ) {
 
 				set_transient( ttw()->slug(), $install_data, DAY_IN_SECONDS );
 				wp_send_json_success( array(
-					'message'     => esc_html__( 'Your template ID and order ID vrifyed. Downloading and installing theme...', 'tm-theme-wizard' ),
+					'message'     => esc_html__( 'Your template ID and order ID verified. Downloading and installing theme...', 'tm-theme-wizard' ),
 					'doNext'      => true,
 					'nextRequest' => array(
 						'action' => 'tm_theme_wizard_install_parent',
